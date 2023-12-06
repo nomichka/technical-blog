@@ -4,7 +4,7 @@ title: Home
 ---
 
 <div class="posts">
-  {% for post in paginator.posts %}
+  {% for post in site.posts %}
     {% if post.hide == null or post.hide == false %}
     <div >
       <h2 class="post-title">
