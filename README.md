@@ -1,3 +1,3 @@
-# Naomi Bashkansky's Technical Blog
+# Naomi Bashkansky's Personal Website
 
 Hi. :)

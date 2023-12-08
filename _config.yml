@@ -2,12 +2,12 @@
 # Site settings
 # -----------------------------------------------------------------------------
 
-title: Naomi Bashkansky's Technical Blog # the website title (if blank, full name will be used instead)
+title: Naomi Bashkansky # the website title (if blank, full name will be used instead)
 first_name: Naomi
 middle_name: 
 last_name: Bashkansky
 email: naomibashkansky@college.harvard.edu
-description: Where I'll write up my projects, paper replications, etc.
+description: 
 footer_text: 
 keywords: machine-learning, ml, deep-learning, reinforcement-learning, iclr  # add your own keywords or leave empty
 
@@ -30,8 +30,8 @@ highlight_theme_light: github   # https://github.com/jwarby/jekyll-pygments-them
 highlight_theme_dark: native    # https://github.com/jwarby/jekyll-pygments-themes
 
 # repo color theme
-repo_theme_light: default       # https://github.com/anuraghazra/github-readme-stats/blob/master/themes/README.md
-repo_theme_dark: dark           # https://github.com/anuraghazra/github-readme-stats/blob/master/themes/README.md
+repo_theme_light: gruvbox_light     # https://github.com/anuraghazra/github-readme-stats/blob/master/themes/README.md
+repo_theme_dark: jolly           # https://github.com/anuraghazra/github-readme-stats/blob/master/themes/README.md
 
 # -----------------------------------------------------------------------------
 # RSS Feed
@@ -109,7 +109,7 @@ bing_site_verification:  # out your bing-site-verification ID (Bing Webmaster)
 
 blog_name: Naomi Bashkansky's Technical Blog # blog_name will be displayed in your blog page
 blog_nav_title: blog # your blog must have a title for it to be displayed in the nav bar
-blog_description: Fall 2023
+blog_description: Where I write about my projects, paper replications, and technical explainers.
 permalink: /blog/:year/:title/
 
 # Pagination
