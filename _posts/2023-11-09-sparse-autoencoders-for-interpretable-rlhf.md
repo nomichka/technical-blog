@@ -48,7 +48,7 @@ toc:
 
 Understanding how machine learning models arrive at the answers they do, known as *machine learning interpretability*, is becoming increasingly important as models are deployed more widely and in high-stakes scenarios. Without interpretability, models may exhibit bias, toxicity, hallucinations, dishonesty, or malice, without their users or their creators knowing. But machine learning models are notoriously difficult to interpret. Adding to the challenge, the most widely used method for aligning language models with human preferences, RLHF (Reinforcement Learning from Human Feedback), impacts model cognition in ways that researchers do not understand. In this work, inspired by recent advances in sparse autoencoders from Anthropic, we investigate how sparse autoencoders can help to interpret large language models. We contribute a novel, more interpretable form of fine-tuning that only learns parameters related to interpretable features of the sparse autoencoder.
 
-{% include figure.html path="assets/img/2022-11-09-sparse-autoencoders-for-interpretable-rlhf/interpretability-hard-cartoon.png" class="img-fluid" %}
+{% include figure.html path="assets/img/2023-11-09-sparse-autoencoders-for-interpretable-rlhf/interpretability-hard-cartoon.png" class="img-fluid" %}
 <div class="caption">
   Machine learning practitioners often cannot interpret the models they build (xkcd #1838).
 </div>
@@ -69,7 +69,7 @@ Researchers have begun to apply sparse autoencoders to other interpretability pr
 
 An **autoencoder** is an architecture for reproducing input data, with a dimensionality bottleneck. Let $d_\text{model}$ denote the dimension of the residual stream in a transformer (4096 for Pythia 6.9B). Let $d_\text{auto}$ denote the dimensionality of the autoencoder. To enforce the dimensionality bottleneck, we require $d_\text{model} > d_\text{auto}$. The diagram below depicts an autoencoder.
 
-{% include figure.html path="assets/img/2022-11-09-sparse-autoencoders-for-interpretable-rlhf/autoencoder.png" class="img-fluid" %}
+{% include figure.html path="assets/img/2023-11-09-sparse-autoencoders-for-interpretable-rlhf/autoencoder.png" class="img-fluid" %}
 <div class="caption">
     An autoencoder is trained to reproduce its input, subject to a dimensionality bottleneck.
 </div>
@@ -80,7 +80,7 @@ $$\mathcal{L}(x; f, g) = \|x - g(f(x))\|_2^2 + \beta \| f(x) \|_1,$$
 
 where $\beta > 0$ trades off sparsity loss with reconstruction loss. With the sparsity constraint, we can now let $d_\text{auto} > d_\text{model}$ by a factor known as the *expansion factor*. In our work, we typically use an expansion factor of $4$ or $8$. The purpose of the sparse autoencoder is to expand out the dimension enough to overcome superposition. The diagram below depicts a sparse autoencoder.
 
-{% include figure.html path="assets/img/2022-11-09-sparse-autoencoders-for-interpretable-rlhf/sparse-autoencoder.png" class="img-fluid" %}
+{% include figure.html path="assets/img/2023-11-09-sparse-autoencoders-for-interpretable-rlhf/sparse-autoencoder.png" class="img-fluid" %}
 <div class="caption">
     A sparse autoencoder is trained to reproduce its input, subject to an $L^1$ sparsity bottleneck.
 </div>
@@ -99,7 +99,7 @@ There are three natural places to insert a sparse autoencoder into a transformer
 
 We choose the second option. The upside of operating in the MLP space is that MLP blocks may be in less superposition than the residual stream, given that MLPs may perform more isolated operations on residual stream subspaces. The upside of operating after the MLP projects down to the residual stream dimension is a matter of economy: because $d_\text{model} < d_\text{MLP}$, we can afford a larger expansion factor with the same memory resources.
 
-{% include figure.html path="assets/img/2022-11-09-sparse-autoencoders-for-interpretable-rlhf/transformer-with-sae.png" class="img-fluid" %}
+{% include figure.html path="assets/img/2023-11-09-sparse-autoencoders-for-interpretable-rlhf/transformer-with-sae.png" class="img-fluid" %}
 <div class="caption">
     We insert a sparse autoencoder into a transformer after the MLP, but before adding into the residual stream.
 </div>
@@ -138,43 +138,43 @@ When inserted into Pythia 6.9B at layer one, our sparse autoencoder achieves a l
 
 As expected, if the sparse autoencoder is inserted into a layer it was not trained for, performance collapses. For example, if inserted at layer $31$ of Pythia 6.9B, the loss becomes $12.586$. Below is a figure showing the additional loss from inserting the sparse autoencoder at the first eight layers of Pythia 6.9B.
 
-{% include figure.html path="assets/img/2022-11-09-sparse-autoencoders-for-interpretable-rlhf/sae-losses.png" class="img-fluid" %}
+{% include figure.html path="assets/img/2023-11-09-sparse-autoencoders-for-interpretable-rlhf/sae-losses.png" class="img-fluid" %}
 <div class="caption">
   The sparse autoencoder preserves model performance in layer 1, the layer it was trained for. The green bar is loss on WikiText-103 of Pythia 6.9B on 5 random batches. The red bar is the additional loss incurred if the sparse autoencoder is inserted after the MLP at a given layer. The first eight layers are shown.
 </div>
 
 For more details on the training run, four figures demonstrating the sparsity, $L^1$ coefficient, $L^1$ loss, and reconstruction loss of our sparse autoencoder during training are shown below. After training on the first five million tokens, we automatically begin to adjust the $L^1$ coefficient $\beta$ until we reach the desired sparsity of $1\%$. By the end, our sparse autoencoder stabilizes at a sparsity of $100$, which means that only $0.5\%$ of sparse autoencoder features activate on a given token.
 
-{% include figure.html path="assets/img/2022-11-09-sparse-autoencoders-for-interpretable-rlhf/SAE_sparsity.svg" class="img-fluid" %}
+{% include figure.html path="assets/img/2023-11-09-sparse-autoencoders-for-interpretable-rlhf/SAE_sparsity.svg" class="img-fluid" %}
 <div class="caption">
   Sparsity across the training run on Pythia 6.9B. On a given batch, sparsity is recorded as the average number of sparse autoencoder features that activate on the batch's $1024$ tokens. Our sparse autoencoder stabilizes at a sparsity of around $100$, or $0.5\%$ of its hidden dimension.
 </div>
 
-{% include figure.html path="assets/img/2022-11-09-sparse-autoencoders-for-interpretable-rlhf/SAE_L1_coeff.svg" class="img-fluid" %}
+{% include figure.html path="assets/img/2023-11-09-sparse-autoencoders-for-interpretable-rlhf/SAE_L1_coeff.svg" class="img-fluid" %}
 <div class="caption">
   The $\beta$ coefficient in $L_1$ loss across the training run on Pythia 6.9B. After training on five million tokens, we begin to adjust the coefficient until the sparse autoencoder reaches its target sparsity of $1\%$.
 </div>
 
-{% include figure.html path="assets/img/2022-11-09-sparse-autoencoders-for-interpretable-rlhf/SAE_L1_loss.svg" class="img-fluid" %}
+{% include figure.html path="assets/img/2023-11-09-sparse-autoencoders-for-interpretable-rlhf/SAE_L1_loss.svg" class="img-fluid" %}
 <div class="caption">
   The $L^1$ loss of the sparse autoencoder across the training run on Pythia 6.9B. The $L^1$ loss initially rises while the $L^1$ coefficient is adjusted, then falls once the target sparsity is reached as the sparse autoencoder learns a more compact representation.
 </div>
 
-{% include figure.html path="assets/img/2022-11-09-sparse-autoencoders-for-interpretable-rlhf/SAE_reconstr_loss.svg" class="img-fluid" %}
+{% include figure.html path="assets/img/2023-11-09-sparse-autoencoders-for-interpretable-rlhf/SAE_reconstr_loss.svg" class="img-fluid" %}
 <div class="caption">
   The reconstruction loss of the sparse autoencoder across the training run on Pythia 6.9B. Reconstruction loss initially rises while the $L^1$ coefficient is adjusted, due to the tradeoff between reconstruction and sparsity. Once the $L^1$ coefficient stabilizes, reconstruction loss slowly falls as the sparse autoencoder learns a more effective representation.
 </div>
 
 We find that our sparse autoencoder learned several interpretable features. For example, the second most frequently activating feature (feature index $11928$) activates strongly on the token “·the”. The figure below shows a table with examples.
 
-{% include figure.html path="assets/img/2022-11-09-sparse-autoencoders-for-interpretable-rlhf/SAE_6-9b_the_feature.png" class="img-fluid" %}
+{% include figure.html path="assets/img/2023-11-09-sparse-autoencoders-for-interpretable-rlhf/SAE_6-9b_the_feature.png" class="img-fluid" %}
 <div class="caption">
   The second most frequent feature (feature index $11928$) in the Pythia 6.9B sparse autoencoder activates on the token "·the". Relevant table columns are $\text{str\_tokens}$ (the token that activates the feature), $\text{context}$ (surrounding tokens in the sentence), and $\text{feature}$ (the raw feature activation in the sparse autoencoder, sorted in descending order). We include the top 15 examples. The feature activates once on “·of” and “·and”, but it activates most on the token “·the”. (Credit: the visualization code for the table is due to Neel Nanda in his open-source replication of Anthropic's sparse autoencoder work.)
 </div>
 
 In addition, we found a surprising correlation between dead features. In particular, almost all dead features point in similar directions, as indicated by a high cosine similarity. In comparison, features that are not dead have a cosine similarity that is much closer to centered at zero. If dead features were drawn from the same distribution as non-dead features, we would expect cosine similarities closer to zero.
 
-{% include figure.html path="assets/img/2022-11-09-sparse-autoencoders-for-interpretable-rlhf/sae-cosine-similarity.png" class="img-fluid" %}
+{% include figure.html path="assets/img/2023-11-09-sparse-autoencoders-for-interpretable-rlhf/sae-cosine-similarity.png" class="img-fluid" %}
 <div class="caption">
   The plot above shows the cosine similarity of dead features (red) and non-dead features (blue). Here, a feature is counted as dead if it activates nowhere on WikiText-103-v1. The cosine similarity is calculated compared to the average dead feature. (Credit: the visualization code for cosine similarity is due to Neel Nanda in his open-source replication of Anthropic's sparse autoencoder work.)
 </div>
@@ -187,7 +187,7 @@ On layer $4$, we observe an unexpected lowering of loss from $6.449$ for the bas
 
 Although the loss does not fall, several features that our interpretable fine-tuning adjusts are interpretable. For example, the feature that is scaled up the most activates on colons (feature index $1338$). Because colons appear twice in every line of the arithmetic data, it makes sense that the fine-tuned model would like to more readibly predict colons. The figure below shows the top activations of feature $1338$ on the arithmetic dataset before and after fine-tuning. After fine-tuning, the feature activates slightly more strongly in all cases.
 
-{% include figure.html path="assets/img/2022-11-09-sparse-autoencoders-for-interpretable-rlhf/colon-feature-1338.jpeg" class="img-fluid" %}
+{% include figure.html path="assets/img/2023-11-09-sparse-autoencoders-for-interpretable-rlhf/colon-feature-1338.jpeg" class="img-fluid" %}
 <div class="caption">
   The table above shows the arithmetic dataset tokens on which feature $1338$ most strongly activates, before fine-tuning in the column $\text{feature}$ and after fine-tuning in the column $\text{feature (FT)}. In all cases, the feature activates slightly more after fine-tuning.
 </div>
@@ -196,12 +196,12 @@ The feature that is most inhibited (feature index $619$) activates on newlines. 
 
 For a broader view of the dynamics of our interpretable fine-tuning, the two figures below show the learned scale and bias terms across every feature in the sparse autoencoder space (where $d_\text{auto} = 2048$), sorted in ascending order. We observe that the majority of features are largely unaffected, but a few features at the tails are significantly enhanced or inhibited.
 
-{% include figure.html path="assets/img/2022-11-09-sparse-autoencoders-for-interpretable-rlhf/fine-tuning-bias.png" class="img-fluid" %}
+{% include figure.html path="assets/img/2023-11-09-sparse-autoencoders-for-interpretable-rlhf/fine-tuning-bias.png" class="img-fluid" %}
 <div class="caption">
   The learned bias in the sparse autoencoder space inhibits approximately half of features while enhancing the other half. The x-axis is sorted so that the feature index runs in ascending order of the learned bias.
 </div>
 
-{% include figure.html path="assets/img/2022-11-09-sparse-autoencoders-for-interpretable-rlhf/fine-tuning-scaling.png" class="img-fluid" %}
+{% include figure.html path="assets/img/2023-11-09-sparse-autoencoders-for-interpretable-rlhf/fine-tuning-scaling.png" class="img-fluid" %}
 <div class="caption">
   The learned scaling coefficient in the sparse autoencoder space significantly inhibits a small number of features while significantly enhancing several others. We also observe that a majority of features ($2/3$) are inhibited, compared to a smaller number enhanced. The x-axis is sorted so that the feature index runs in ascending order of the learned scaling. 
 </div>
