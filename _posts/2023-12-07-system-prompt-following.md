@@ -35,4 +35,6 @@ toc:
 
 ## Introduction
 
-I'll write this blog post after the paper is accepted! For now, here is a benchmark for system prompts I created: [https://huggingface.co/datasets/Naomibas/llm-system-prompts-benchmark](https://huggingface.co/datasets/Naomibas/llm-system-prompts-benchmark).
+I'll write this blog post after the paper is accepted. For now, here is a benchmark for system prompts I created: [https://huggingface.co/datasets/Naomibas/llm-system-prompts-benchmark](https://huggingface.co/datasets/Naomibas/llm-system-prompts-benchmark).
+
+Edit 2/19: Paper has been put on arXiv! See here: [https://arxiv.org/abs/2402.10962](https://arxiv.org/abs/2402.10962).
